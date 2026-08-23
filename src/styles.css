@@ -1,0 +1,318 @@
+/* ---------------------------------------------------------------
+   The Enchanted Archive — overlay chrome + book-page typography.
+   The 3D scene lives on #gl; everything here floats above it.
+   --------------------------------------------------------------- */
+
+:root{
+  --obsidian:#1a0f2e;
+  --void:#08050f;
+  --gem:#b46bff;
+  --gem-deep:#5a1fa3;
+  --lavender:#dcb8ff;
+  --gold:#d4af37;
+  --parchment:#f2e6c9;
+  --ink:#2b1d0e;
+  --ink-soft:rgba(43,29,14,.58);
+  --ink-faint:rgba(43,29,14,.24);
+  --green:#55ff6a;
+  --red:#ff5b5b;
+  --ease-out:cubic-bezier(.22,.9,.28,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+html,body{height:100%}
+body{
+  background:var(--void);
+  color:var(--lavender);
+  font-family:'Pixel',ui-monospace,'Courier New',monospace;
+  overflow:hidden;
+  overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+}
+
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+#vignette{
+  position:fixed;inset:0;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(115% 80% at 50% 34%, rgba(90,31,163,.22), transparent 62%),
+    radial-gradient(150% 110% at 50% 104%, rgba(180,107,255,.10), transparent 58%),
+    radial-gradient(105% 105% at 50% 48%, transparent 34%, rgba(8,5,15,.88) 100%);
+}
+
+.sr-only{
+  position:absolute!important;width:1px;height:1px;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
+}
+
+/* --- Title ----------------------------------------------------- */
+#title{
+  position:fixed;z-index:3;left:50%;top:max(4.2vh,1.4rem);
+  transform:translateX(-50%);
+  width:max-content;max-width:92vw;text-align:center;
+  font-family:'Pixel',ui-monospace,monospace;font-weight:700;
+  font-size:clamp(1.05rem,3.5vw,2.05rem);
+  letter-spacing:.18em;text-transform:uppercase;
+  color:#f0e2ff;
+  text-shadow:
+    .1em .1em 0 #2a0f4d,
+    0 0 .5em rgba(180,107,255,.75),
+    0 0 1.4em rgba(140,70,220,.5);
+  pointer-events:none;
+  transition:opacity .6s var(--ease-out),transform .6s var(--ease-out);
+}
+#title span{display:block}
+#title::after{
+  content:'';display:block;height:2px;width:62%;margin:.62em auto 0;
+  background:linear-gradient(90deg,transparent,var(--gem-deep),var(--gem),var(--gem-deep),transparent);
+  opacity:.85;
+}
+
+/* --- Hint ------------------------------------------------------- */
+#hint{
+  position:fixed;z-index:3;left:50%;bottom:max(4.5vh,1.5rem);
+  transform:translateX(-50%);
+  transition:opacity .45s var(--ease-out),transform .45s var(--ease-out);
+}
+#hint-btn{
+  font:inherit;font-size:clamp(.7rem,2.1vw,.9rem);letter-spacing:.14em;
+  text-transform:lowercase;
+  color:var(--lavender);background:none;border:0;cursor:pointer;
+  padding:.7em 1.1em;
+  text-shadow:.09em .09em 0 rgba(20,8,40,.9),0 0 .7em rgba(180,107,255,.55);
+  animation:hintPulse 2.6s ease-in-out infinite;
+}
+#hint-btn:hover{color:#fff}
+#hint-btn:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
+@keyframes hintPulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+/* --- Demo credentials note -------------------------------------- */
+#demo-note{
+  position:fixed;z-index:3;right:max(1.1rem,env(safe-area-inset-right));
+  bottom:max(.9rem,env(safe-area-inset-bottom));
+  font-size:.66rem;letter-spacing:.08em;color:rgba(220,184,255,.42);
+  text-shadow:.09em .09em 0 rgba(10,5,20,.9);pointer-events:none;
+}
+#demo-note b{color:rgba(220,184,255,.72);font-weight:700}
+
+#noscript{position:fixed;inset:auto 0 50% 0;text-align:center;z-index:9}
+
+/* Chrome recedes once the book is open. */
+body[data-open="true"] #title{opacity:.28;transform:translateX(-50%) translateY(-.35rem)}
+body[data-open="true"] #hint{opacity:0;transform:translateX(-50%) translateY(.6rem);pointer-events:none}
+#hint{display:flex;flex-direction:column;align-items:center;gap:.7rem}
+
+/* ================================================================
+   CSS3D layer — the DOM spread welded to the 3D book's surface
+   ================================================================ */
+#css3d{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+#css3d-cam{position:absolute;top:0;left:0;transform-style:preserve-3d}
+
+.spread{
+  position:absolute;top:0;left:0;
+  transform-style:preserve-3d;backface-visibility:hidden;
+  display:flex;align-items:stretch;
+  color:var(--ink);
+  opacity:0;transition:opacity .35s linear;
+}
+.spread[data-open="true"]{opacity:1}
+.spread[data-open="true"] .field[data-show="true"]{pointer-events:auto}
+
+.spread{--crease:40px}
+.leaf{width:50%;padding:1.9em 1.5em 1.6em;display:flex;flex-direction:column;
+  position:relative;overflow:hidden}
+.leaf > *{flex-shrink:0}
+.leaf-l{padding-right:calc(var(--crease) + .9em);align-items:center;text-align:center}
+.leaf-r{padding-left:calc(var(--crease) + .9em);padding-top:3.2em}
+
+/* --- Left leaf: lore ------------------------------------------- */
+.sigil{width:3.2em;height:3.2em;flex:none;opacity:.9}
+.leaf-title{
+  margin-top:.5em;
+  font-family:'Pixel',ui-monospace,monospace;font-weight:700;
+  font-size:1.14em;line-height:1.18;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink);
+}
+.runerow{height:1em;width:86%;margin:.6em 0 .65em;opacity:.6}
+.lore{
+  font-family:'Scribe',Georgia,serif;font-size:.85em;line-height:1.5;
+  color:var(--ink-soft);font-style:italic;text-wrap:balance;
+}
+
+.steps{list-style:none;margin-top:auto;padding-top:.8em;width:100%;font-size:.86em;text-align:left}
+.steps li{
+  display:flex;align-items:center;gap:.55em;padding:.26em 0;
+  font-family:'Scribe',Georgia,serif;color:var(--ink-faint);
+  transition:color .3s linear;
+}
+.steps .mark{
+  width:.92em;height:.92em;flex:none;border:2px solid currentColor;
+  position:relative;font-style:normal;
+}
+.steps li[data-state="active"]{color:var(--ink-soft)}
+.steps li[data-state="done"]{color:var(--ink-soft)}
+.steps li[data-state="done"] .mark::after{
+  content:'';position:absolute;inset:.1em;
+  background:currentColor;
+}
+
+/* --- Right leaf: the flow --------------------------------------- */
+.prompt{
+  min-height:3.2em;
+  font-family:'Scribe',Georgia,serif;font-size:1.16em;line-height:1.4;
+  color:var(--ink);
+}
+.caret{
+  display:inline-block;width:.5em;height:1.02em;margin-left:.06em;
+  background:var(--ink);vertical-align:-.16em;opacity:0;
+}
+.caret[data-on="true"]{animation:blink 1.05s steps(1,end) infinite}
+@keyframes blink{0%,49%{opacity:.9}50%,100%{opacity:0}}
+
+.field{
+  display:flex;align-items:center;gap:.5em;
+  margin-top:.5em;opacity:0;pointer-events:none;
+  transform:translateY(.4em);
+  transition:opacity .3s linear,transform .3s var(--ease-out);
+}
+.field[data-show="true"]{opacity:1;transform:none}
+
+#entry{
+  flex:1 1 auto;min-width:0;
+  font-family:'Scribe',Georgia,serif;font-size:1.16em;
+  color:var(--ink);background:transparent;
+  border:0;border-bottom:2px dashed var(--ink-faint);
+  padding:.34em .1em;outline:0;caret-color:var(--ink);
+  letter-spacing:.02em;
+}
+#entry::placeholder{color:var(--ink-faint)}
+#entry:focus{border-bottom-style:solid;border-bottom-color:var(--ink-soft)}
+#entry:focus-visible{box-shadow:0 .22em 0 -.16em rgba(90,31,163,.5)}
+#entry[type="password"]{letter-spacing:.22em;font-size:1.25em}
+
+.arrow{
+  display:block;width:0;height:0;
+  border-style:solid;border-width:.42em 0 .42em .62em;
+  border-color:transparent transparent transparent var(--parchment);
+}
+#submit{
+  flex:none;width:2.2em;height:2.2em;
+  display:grid;place-items:center;
+  font-size:.86em;color:var(--parchment);
+  background:var(--ink);border:0;cursor:pointer;
+  box-shadow:.14em .14em 0 rgba(43,29,14,.32);
+  transition:transform .12s var(--ease-out),box-shadow .12s var(--ease-out);
+}
+#submit:hover{background:#3f2c16}
+#submit:active{transform:translate(.1em,.1em);box-shadow:.05em .05em 0 rgba(43,29,14,.32)}
+#submit:focus-visible{outline:2px solid var(--gem-deep);outline-offset:3px}
+
+/* --- Ritual checklist (Crafting / Enchanting / Brewing) --------- */
+.ritual{list-style:none;margin-top:1.5em;display:flex;flex-direction:column;gap:.62em}
+.ritual li{
+  display:flex;align-items:baseline;gap:.55em;
+  font-family:'Pixel',ui-monospace,monospace;font-weight:700;
+  font-size:1.02em;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink);
+  animation:riseIn .34s var(--ease-out) both;
+}
+.ritual .tick{
+  position:relative;display:inline-block;width:.9em;height:1em;flex:none;
+}
+.ritual .tick::before{
+  content:'';position:absolute;left:.16em;top:.42em;width:.36em;height:.16em;
+  background:var(--ink-faint);
+}
+.ritual li[data-done="true"] .tick::before{display:none}
+.ritual li[data-done="true"] .tick::after{
+  content:'';position:absolute;left:.24em;top:.06em;
+  width:.3em;height:.62em;
+  border:solid #3f6b2c;border-width:0 .17em .17em 0;
+  transform:rotate(40deg);
+}
+.ritual li[data-done="true"]{color:var(--ink-soft)}
+.ritual li[data-done="true"] .tick{color:#3f6b2c}
+.ritual .dots{letter-spacing:.1em}
+@keyframes riseIn{from{opacity:0;transform:translateY(.45em)}to{opacity:1;transform:none}}
+
+/* --- Verdict ----------------------------------------------------- */
+.verdict{
+  margin-top:1.15em;
+  font-family:'Pixel',ui-monospace,monospace;font-weight:700;
+  font-size:1.5em;letter-spacing:.14em;text-transform:uppercase;
+  line-height:1.2;opacity:0;transition:opacity .25s linear;
+}
+.verdict[data-show="true"]{opacity:1;animation:verdictIn .4s var(--ease-out) both}
+.verdict[data-kind="ok"]{color:#1f7a2c;text-shadow:0 0 .5em rgba(85,255,106,.75),.07em .07em 0 rgba(43,29,14,.22)}
+.verdict[data-kind="bad"]{color:#a8231f;text-shadow:0 0 .45em rgba(255,91,91,.6),.07em .07em 0 rgba(43,29,14,.22)}
+@keyframes verdictIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+
+#archive-link{
+  font-family:'Pixel',ui-monospace,monospace;font-weight:700;
+  font-size:clamp(.72rem,2.2vw,.9rem);letter-spacing:.12em;text-transform:uppercase;
+  color:#eaffe9;background:#2f6b33;
+  border:2px solid #7ee08a;border-bottom-width:.34em;
+  padding:.7em 1.2em;cursor:pointer;
+  box-shadow:0 0 1.4em rgba(85,255,106,.45);
+}
+#archive-link[hidden]{display:none}
+#archive-link:hover{background:#397f3e}
+#archive-link:focus-visible{outline:2px solid #b46bff;outline-offset:3px}
+
+.leaf.is-cramped .lore,
+.leaf.is-cramped .runerow{display:none}
+
+/* --- Portrait spread ---------------------------------------------
+   On a phone the book turns 90 degrees so its crease runs ACROSS the
+   screen; the two leaves stack, and the layout has to follow, or text
+   would sit on the spine. ---------------------------------------- */
+.spread.is-portrait{flex-direction:column}
+.spread.is-portrait .leaf{width:100%;height:50%}
+.spread.is-portrait .leaf-l{
+  flex-flow:row wrap;align-items:center;justify-content:center;
+  align-content:center;gap:0 1em;text-align:center;
+  padding:1.4em 1.8em calc(var(--crease) + .7em);
+}
+.spread.is-portrait .leaf-title{
+  margin-top:0;font-size:1.02em;line-height:1.12;flex:0 1 auto;text-align:left;
+}
+.spread.is-portrait .sigil{width:2.9em;height:2.9em}
+.spread.is-portrait .runerow{flex:1 0 100%;width:auto;margin:.7em 0 .55em}
+.spread.is-portrait .lore{flex:1 0 100%}
+.spread.is-portrait .steps{
+  flex:1 0 100%;margin:.9em 0 0;padding:0;width:auto;
+  display:flex;justify-content:center;gap:.9em;font-size:.82em;
+}
+.spread.is-portrait .steps li{padding:0}
+.spread.is-portrait .steps li span{display:none}
+.spread.is-portrait .leaf-r{
+  padding:calc(var(--crease) + 1.1em) 1.8em 1.5em;
+  justify-content:flex-start;
+}
+
+/* --- Tight (small on-screen page) --------------------------------- */
+.spread.is-tight .leaf-r{padding-top:2.2em}
+.spread.is-tight .prompt{min-height:2.5em;font-size:1.08em}
+.spread.is-tight .runerow{display:none}
+.spread.is-tight .ritual{margin-top:1em;gap:.45em;font-size:.92em}
+.spread.is-tight .verdict{font-size:1.24em;margin-top:.8em}
+
+/* --- Reduced motion --------------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+  }
+  #hint-btn{opacity:.9}
+  .caret[data-on="true"]{opacity:.9}
+}
+
+/* --- Empty-submit nudge ------------------------------------------ */
+.field[data-nudge="true"]{animation:nudge .34s ease-in-out}
+@keyframes nudge{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-.5em)}
+  75%{transform:translateX(.5em)}
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>The Enchanted Archive</title>
+<meta name="description" content="A Minecraft-inspired enchanting table login page, built with Three.js voxel geometry and procedural pixel textures.">
+<style>
+/* Pixelify Sans — SIL Open Font License 1.1 */
+@font-face{font-family:'Pixel';font-style:normal;font-weight:400 700;font-display:block;
+src:url(data:font/woff2;base64,/*{{FONT_PIXEL}}*/) format('woff2');}
+/* Special Elite — Apache License 2.0 */
+@font-face{font-family:'Scribe';font-style:normal;font-weight:400;font-display:block;
+src:url(data:font/woff2;base64,/*{{FONT_HAND}}*/) format('woff2');}
+/*{{CSS}}*/
+</style>
+</head>
+<body data-open="false">
+
+<canvas id="gl"></canvas>
+<div id="vignette" aria-hidden="true"></div>
+
+<!-- DOM page text, welded onto the 3D book's surface with a CSS3D transform -->
+<div id="css3d"><div id="css3d-cam">
+  <div id="spread" class="spread" data-open="false">
+    <div class="leaf leaf-l">
+      <div class="sigil" aria-hidden="true"></div>
+      <h2 class="leaf-title">The Enchanted<br>Archive</h2>
+      <div class="runerow" aria-hidden="true"></div>
+      <p class="lore">Speak thy name unto the page, and the runes shall judge thee.</p>
+      <ol class="steps" id="steps">
+        <li data-state="idle"><i class="mark"></i><span>Thy name</span></li>
+        <li data-state="idle"><i class="mark"></i><span>Thy secret word</span></li>
+        <li data-state="idle"><i class="mark"></i><span>The rite</span></li>
+      </ol>
+    </div>
+
+    <div class="leaf leaf-r">
+      <p class="prompt"><span id="prompt-text"></span><i class="caret" id="caret"></i></p>
+
+      <form id="form" class="field" data-show="false" novalidate>
+        <label class="sr-only" for="entry" id="entry-label">Username</label>
+        <input id="entry" name="username" type="text" autocomplete="username"
+               autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+        <button type="submit" id="submit"><i class="arrow" aria-hidden="true"></i><span class="sr-only">Submit</span></button>
+      </form>
+
+      <ul class="ritual" id="ritual"></ul>
+      <p class="verdict" id="verdict" data-show="false"></p>
+    </div>
+  </div>
+</div></div>
+
+<h1 id="title"><span>The Enchanted Archive</span></h1>
+
+<div id="hint">
+  <button type="button" id="hint-btn">click the book to begin</button>
+  <button type="button" id="archive-link" hidden>Enter the Archive</button>
+</div>
+
+<p id="demo-note">demo &middot; <b>steve</b> / <b>diamondpickaxe</b></p>
+<p id="live" class="sr-only" role="status" aria-live="polite"></p>
+<noscript><p id="noscript">This scene needs JavaScript and WebGL.</p></noscript>
+
+<script>/*{{THREE}}*/</script>
+<script>/*{{APP}}*/</script>
+</body>
+</html>
