@@ -18,11 +18,13 @@ Three.js, both fonts, the CSS and the app code are all inlined.
 
 ```
 index.html      the deliverable — open this
-build.mjs       inlines src/ into index.html
+welcome.html    the post-login landing page, opened in a new tab on success
+build.mjs       inlines src/ into index.html and welcome.html
 src/
   page.html     markup + the <style>/<script> slots
   styles.css    overlay chrome and book-page typography
   app.js        scene, textures, particles, page tracking, login flow
+  welcome.html  source for the post-login landing page
   fonts/        two woff2 subsets (embedded at build time)
   vendor/       three.js r169
 prd.md          the design brief
@@ -91,14 +93,20 @@ independently of it — the brief calls for a paced flourish regardless of how
 fast the check resolves, so the flow awaits both and uses whichever verdict
 comes back.
 
-`CONFIG` next to it holds the demo credentials, the redirect URL, and the
+`CONFIG` next to it holds the demo credentials, the post-login page, and the
 timings for the rite and the verdicts.
 
 ## Behaviour details
 
-- **Popup blocking.** Browsers block `window.open` this long after a click, so
-  on success the page tries the redirect and, if blocked, surfaces an
-  "Enter the Archive" button instead of silently doing nothing.
+- **Popup blocking.** No tab is opened until a successful verdict has fully
+  played out — the user's focus stays on the main tab through the whole
+  Crafting/Enchanting/Brewing sequence and verdict, on both the success and
+  failure paths. On success, once the particle burst finishes, `window.open`
+  is tried exactly once; this is well past the point browsers still treat it
+  as gesture-triggered, so it's expected to be blocked. When it is, the page
+  surfaces an "Enter the Archive" button instead of silently doing nothing —
+  a real click is always a valid gesture. On invalid credentials, no tab is
+  ever opened.
 - **`prefers-reduced-motion`.** No bob, spin, parallax, camera move or
   particles; the book snaps open and shut and the typewriter prints instantly.
   The 10-second rite still runs — it's pacing, not motion. Toggling the setting

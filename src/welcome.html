@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>The Enchanted Archive</title>
+<meta name="robots" content="noindex">
+<style>
+/* Pixelify Sans — SIL Open Font License 1.1 */
+@font-face{font-family:'Pixel';font-style:normal;font-weight:400 700;font-display:block;
+src:url(data:font/woff2;base64,/*{{FONT_PIXEL}}*/) format('woff2');}
+/* Special Elite — Apache License 2.0 */
+@font-face{font-family:'Scribe';font-style:normal;font-weight:400;font-display:block;
+src:url(data:font/woff2;base64,/*{{FONT_HAND}}*/) format('woff2');}
+
+:root{
+  --void:#08050f;
+  --gem:#b46bff;
+  --gem-deep:#5a1fa3;
+  --lavender:#dcb8ff;
+  --gold:#d4af37;
+  --parchment:#f2e6c9;
+  --green:#55ff6a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--void);
+  color:var(--lavender);
+  font-family:'Pixel',ui-monospace,'Courier New',monospace;
+  -webkit-font-smoothing:antialiased;
+  display:grid;place-items:center;
+  min-height:100vh;
+  padding:1.5rem;
+  overflow:hidden;
+}
+
+#glow{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(70% 55% at 50% 38%, rgba(180,107,255,.20), transparent 62%),
+    radial-gradient(120% 90% at 50% 100%, rgba(90,31,163,.16), transparent 58%);
+}
+
+main{
+  position:relative;z-index:1;
+  width:min(30rem,92vw);
+  text-align:center;
+}
+
+.sigil{
+  width:44px;height:44px;margin:0 auto 1.4rem;opacity:.9;
+  image-rendering:pixelated;
+}
+
+h1{
+  font-size:clamp(1.15rem,4vw,1.7rem);
+  letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+  color:#f0e2ff;
+  text-shadow:
+    .1em .1em 0 #2a0f4d,
+    0 0 .5em rgba(180,107,255,.75),
+    0 0 1.4em rgba(140,70,220,.5);
+}
+
+.status{
+  margin-top:.9em;
+  font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--green);
+  text-shadow:0 0 .6em rgba(85,255,106,.6);
+}
+
+.rule{
+  height:2px;width:56%;margin:1.5em auto;
+  background:linear-gradient(90deg,transparent,var(--gem-deep),var(--gem),var(--gem-deep),transparent);
+  opacity:.85;
+}
+
+.welcome{
+  font-family:'Scribe',Georgia,serif;
+  font-size:1.15rem;line-height:1.5;
+  color:var(--parchment);
+}
+.welcome b{font-weight:400;color:#fff;}
+
+.lore{
+  margin-top:.9em;
+  font-family:'Scribe',Georgia,serif;font-style:italic;
+  font-size:.95rem;line-height:1.6;
+  color:rgba(220,184,255,.72);
+}
+
+.gold-line{
+  margin-top:1.8em;
+  font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);opacity:.75;
+}
+</style>
+</head>
+<body>
+<div id="glow" aria-hidden="true"></div>
+
+<main>
+  <svg class="sigil" viewBox="0 0 11 11" shape-rendering="crispEdges" aria-hidden="true">
+    <g fill="#2b1d0e">
+      <rect x="5" y="0" width="1" height="1"/>
+      <rect x="4" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/>
+      <rect x="3" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/>
+      <rect x="2" y="3" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/>
+      <rect x="1" y="4" width="1" height="1"/><rect x="9" y="4" width="1" height="1"/>
+      <rect x="0" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/>
+      <rect x="1" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/>
+      <rect x="2" y="7" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/>
+      <rect x="3" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/>
+      <rect x="4" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/>
+      <rect x="5" y="10" width="1" height="1"/>
+    </g>
+    <g fill="#5a1fa3">
+      <rect x="4" y="3" width="3" height="1"/>
+      <rect x="3" y="4" width="5" height="1"/>
+      <rect x="2" y="5" width="7" height="1"/>
+      <rect x="3" y="6" width="5" height="1"/>
+      <rect x="4" y="7" width="3" height="1"/>
+    </g>
+  </svg>
+
+  <h1>The Enchanted Archive</h1>
+  <p class="status">access granted</p>
+
+  <div class="rule" aria-hidden="true"></div>
+
+  <p class="welcome">Welcome, <b id="who">traveler</b>.</p>
+  <p class="lore">The archive recognizes you. Its pages turn themselves,
+    now, for as long as you remain.</p>
+
+  <p class="gold-line">the enchanting table dims behind you</p>
+</main>
+
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var name = (params.get('u') || '').trim();
+  if (name) document.getElementById('who').textContent = name;
+})();
+</script>
+</body>
+</html>

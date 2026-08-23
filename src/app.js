@@ -18,7 +18,7 @@
 var CONFIG = {
   /* Swap this one function for a real fetch() to wire up a backend. */
   credentials: { username: 'steve', password: 'diamondpickaxe' },
-  redirectUrl: 'https://minecraft.wiki/w/Enchanting_Table',
+  archivePage: 'welcome.html',
 
   /* Paced flourish — 10s total, regardless of how fast auth resolves. */
   rites: [
@@ -1353,14 +1353,22 @@ function resetPage() {
 }
 
 /* --- Redirect --------------------------------------------------------- */
+var lastUsername = '';
+
+function archiveUrl() {
+  return CONFIG.archivePage + '?u=' + encodeURIComponent(lastUsername);
+}
+
 function enterArchive() {
-  var tab = window.open(CONFIG.redirectUrl, '_blank');
+  /* This runs several seconds after the last click, well past the window
+     browsers treat as gesture-triggered, so window.open is likely to be
+     blocked here — that's expected. When it is, fall back to a visible
+     button; a real click is always a valid gesture and is never blocked. */
+  var tab = window.open(archiveUrl(), '_blank');
   if (tab) {
     try { tab.opener = null; } catch (e) { /* cross-origin */ }
     return true;
   }
-  /* Blocked, as it will be this long after the click. Surface a button so the
-     redirect is one gesture away rather than silently failing. */
   el.archive.hidden = false;
   el.hint.textContent = 'the archive awaits';
   return false;
@@ -1389,6 +1397,7 @@ async function runFlow() {
   showField('text', 'Username', 'username');
   var username = await awaitSubmit();
   if (!alive()) return;
+  lastUsername = username.trim();
 
   // State 4 — password
   state = 'pass';
@@ -1480,7 +1489,7 @@ window.addEventListener('pointerleave', function () { parallax.tx = 0; parallax.
 
 el.hint.addEventListener('click', tryOpen);
 el.archive.addEventListener('click', function () {
-  window.open(CONFIG.redirectUrl, '_blank', 'noopener');
+  window.open(archiveUrl(), '_blank', 'noopener');
 });
 
 window.addEventListener('resize', resize);

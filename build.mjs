@@ -40,3 +40,10 @@ const html = src('page.html')
 
 writeFileSync(join(root, 'index.html'), html);
 console.log(`index.html written — ${(html.length / 1024).toFixed(0)} KB`);
+
+const welcomeHtml = src('welcome.html')
+  .replace('/*{{FONT_PIXEL}}*/', b64('fonts/pixelify-latin.woff2'))
+  .replace('/*{{FONT_HAND}}*/', b64('fonts/specialelite-latin.woff2'));
+
+writeFileSync(join(root, 'welcome.html'), welcomeHtml);
+console.log(`welcome.html written — ${(welcomeHtml.length / 1024).toFixed(0)} KB`);
